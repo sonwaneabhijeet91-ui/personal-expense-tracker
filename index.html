@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Expense Tracker</title>
+<style>
+body{font-family:Arial;background:#f2f5f9;margin:0;padding:20px}
+.container{max-width:700px;margin:auto;background:white;padding:25px;border-radius:12px}
+h1{text-align:center;color:#2563eb}
+form{display:grid;gap:10px}
+input,select,button{padding:12px;border:1px solid #ccc;border-radius:6px}
+button{background:#2563eb;color:white;border:none;cursor:pointer}
+.total{background:#dbeafe;padding:15px;margin:20px 0;font-size:20px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+.delete{background:#dc2626;padding:7px}
+@media(max-width:500px){.container{padding:12px}th,td{padding:6px;font-size:13px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Personal Expense Tracker</h1>
+<form id="expenseForm">
+<input id="name" placeholder="Expense name" required>
+<input id="amount" type="number" placeholder="Amount (₹)" min="0.01" step="0.01" required>
+<select id="category">
+<option>Food</option><option>Travel</option>
+<option>Shopping</option><option>Bills</option><option>Other</option>
+</select>
+<input id="date" type="date" required>
+<button type="submit">Add Expense</button>
+</form>
+<div class="total">Total Expenses: ₹<span id="total">0.00</span></div>
+<table>
+<thead><tr><th>Name</th><th>Amount</th><th>Category</th><th>Action</th></tr></thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+<script>
+let expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+const form = document.getElementById("expenseForm");
+const list = document.getElementById("list");
+const total = document.getElementById("total");
+document.getElementById("date").valueAsDate = new Date();
+
+function render(){
+list.innerHTML = "";
+let sum = 0;
+expenses.forEach((e,i)=>{
+sum += e.amount;
+let row = list.insertRow();
+[e.name,"₹"+e.amount.toFixed(2),e.category].forEach(text=>{
+let cell = row.insertCell();
+cell.textContent = text;
+});
+let btn = document.createElement("button");
+btn.textContent = "Delete";
+btn.className = "delete";
+btn.onclick = ()=>{expenses.splice(i,1);save();};
+row.insertCell().appendChild(btn);
+});
+total.textContent = sum.toFixed(2);
+}
+function save(){
+localStorage.setItem("expenses",JSON.stringify(expenses));
+render();
+}
+form.onsubmit = e=>{
+e.preventDefault();
+expenses.push({
+name:document.getElementById("name").value.trim(),
+amount:Number(document.getElementById("amount").value),
+category:document.getElementById("category").value,
+date:document.getElementById("date").value
+});
+save();
+form.reset();
+document.getElementById("date").valueAsDate = new Date();
+};
+render();
+</script>
+</body>
+</html>
